@@ -48,9 +48,9 @@ const slideVariants = {
 };
 
 /**
- * The stickman fitting stage. Renders the stickman figure across all four views
- * with layered t-shirt and jogger cutouts that slide horizontally (left to right)
- * when the user pushes the slot buttons.
+ * Borderless centered stickman fitting stage. Renders the stickman figure across
+ * all four views with layered t-shirt and jogger cutouts that slide horizontally
+ * (left to right) when the user pushes the slot buttons.
  */
 export function GarmentStage({
   tshirt,
@@ -71,20 +71,14 @@ export function GarmentStage({
       {...dragHandlers}
       role="group"
       aria-label={`Stickman wearing ${tshirt.name} and ${jogger.name}, ${VIEW_LABELS[view].toLowerCase()} view.`}
-      className="group relative mx-auto w-full max-w-[min(460px,52dvh)] touch-pan-y select-none lg:max-w-[min(440px,56dvh)]"
+      className="group relative mx-auto w-full max-w-[min(440px,48dvh)] touch-pan-y select-none"
       style={{ cursor: dragging ? "grabbing" : "grab" }}
     >
-      <div className="stage-backdrop relative aspect-3/4 overflow-hidden rounded-[2rem] border border-line bg-white">
-        {/* subtle floor line */}
-        <div
-          className="absolute inset-x-10 bottom-[10%] h-px bg-line"
-          aria-hidden="true"
-        />
-
+      <div className="relative aspect-3/4 overflow-visible bg-white">
         {/* contact shadow beneath the stickman */}
         <div
           aria-hidden="true"
-          className="stage-shadow absolute bottom-[7.5%] left-1/2 h-[5%] w-[48%] -translate-x-1/2 transition-transform duration-500"
+          className="stage-shadow absolute bottom-[6%] left-1/2 h-[4.5%] w-[44%] -translate-x-1/2 transition-transform duration-500"
           style={{
             transform: `translate3d(calc(-50% + ${dragOffset * 0.3}px), 0, 0) scaleX(${
               view === "left" || view === "right" ? 0.68 : 1
@@ -105,7 +99,7 @@ export function GarmentStage({
             <div
               key={key}
               aria-hidden={!isActive}
-              className="pointer-events-none absolute inset-0 flex items-center justify-center will-change-[opacity,transform]"
+              className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden will-change-[opacity,transform]"
               style={{
                 opacity: isActive ? 1 : 0,
                 transform: isActive
@@ -117,7 +111,7 @@ export function GarmentStage({
                     : "opacity 340ms var(--ease-room), transform 500ms var(--ease-room)",
               }}
             >
-              <div className="relative h-[88%] aspect-3/4">
+              <div className="relative h-[92%] aspect-3/4">
                 {/* Base stickman body */}
                 <div className="absolute inset-0">
                   <StickmanFigure view={key} />
@@ -186,64 +180,61 @@ export function GarmentStage({
         {/* Minimalist left/right controls aligned to T-Shirt (upper body) */}
         <div
           onPointerDown={(e) => e.stopPropagation()}
-          className="pointer-events-auto absolute inset-x-3 top-[34%] flex -translate-y-1/2 items-center justify-between"
+          className="pointer-events-auto absolute inset-x-0 top-[34%] flex -translate-y-1/2 items-center justify-between"
         >
           <button
             type="button"
             onClick={() => onStepTshirt(-1)}
             aria-label="Previous t-shirt"
-            className="flex size-9 items-center justify-center rounded-full border border-line bg-white/90 text-ink transition-all duration-200 hover:border-ink hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-all duration-200 hover:scale-110 hover:text-ink active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
-            <ChevronIcon direction="left" className="size-4" />
+            <ChevronIcon direction="left" className="size-5" />
           </button>
           <button
             type="button"
             onClick={() => onStepTshirt(1)}
             aria-label="Next t-shirt"
-            className="flex size-9 items-center justify-center rounded-full border border-line bg-white/90 text-ink transition-all duration-200 hover:border-ink hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-all duration-200 hover:scale-110 hover:text-ink active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
-            <ChevronIcon direction="right" className="size-4" />
+            <ChevronIcon direction="right" className="size-5" />
           </button>
         </div>
 
         {/* Minimalist left/right controls aligned to Jogger (lower body) */}
         <div
           onPointerDown={(e) => e.stopPropagation()}
-          className="pointer-events-auto absolute inset-x-3 top-[66%] flex -translate-y-1/2 items-center justify-between"
+          className="pointer-events-auto absolute inset-x-0 top-[66%] flex -translate-y-1/2 items-center justify-between"
         >
           <button
             type="button"
             onClick={() => onStepJogger(-1)}
             aria-label="Previous jogger"
-            className="flex size-9 items-center justify-center rounded-full border border-line bg-white/90 text-ink transition-all duration-200 hover:border-ink hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-all duration-200 hover:scale-110 hover:text-ink active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
-            <ChevronIcon direction="left" className="size-4" />
+            <ChevronIcon direction="left" className="size-5" />
           </button>
           <button
             type="button"
             onClick={() => onStepJogger(1)}
             aria-label="Next jogger"
-            className="flex size-9 items-center justify-center rounded-full border border-line bg-white/90 text-ink transition-all duration-200 hover:border-ink hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-all duration-200 hover:scale-110 hover:text-ink active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
-            <ChevronIcon direction="right" className="size-4" />
+            <ChevronIcon direction="right" className="size-5" />
           </button>
         </div>
 
-        {/* Top bar inside stage: current angle label + Randomize button */}
+        {/* Minimalist Randomize button */}
         <div
           onPointerDown={(e) => e.stopPropagation()}
-          className="absolute inset-x-5 top-4 flex items-center justify-between"
+          className="absolute top-1 right-0"
         >
-          <p aria-hidden="true" className="eyebrow">
-            {VIEW_LABELS[view]}
-          </p>
           <button
             type="button"
             onClick={onRandomize}
             aria-label="Randomize outfit"
-            className="flex items-center gap-1.5 rounded-full border border-line bg-white/90 px-3 py-1.5 text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-ink transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-ink-faint transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
-            <ShuffleIcon className="size-3" />
+            <ShuffleIcon className="size-3.5" />
             <span>Random</span>
           </button>
         </div>
