@@ -2,23 +2,29 @@
 
 /* ---------------------------------------------------------------
    syle.studio — design tokens
-   A warm, light studio: bone walls, a pool of light, soft shadow.
-   Committed single palette; the room is meant to look like a room.
+   Pure white studio: crisp white backdrop, clean neutral lines,
+   minimalist contrast.
    --------------------------------------------------------------- */
 :root {
-  --bone: #f4f1ea;
-  --bone-deep: #e8e3d8;
-  --paper: #fbfaf7;
-  --ink: #1c1a17;
-  --ink-soft: #55504a;
-  --ink-faint: #8d867c;
-  --line: #ddd7c9;
-  --accent: #1c1a17;
+  --bone: #ffffff;
+  --bone-deep: #fafafa;
+  --paper: #ffffff;
+  --ink: #111111;
+  --ink-soft: #525252;
+  --ink-faint: #8a8a8a;
+  --line: #e5e5e5;
+  --accent: #111111;
 
-  --stage-floor: #e2dccd;
-  --stage-light: #fdfcf9;
+  --stage-floor: #ffffff;
+  --stage-light: #ffffff;
 
   --ease-room: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Real Helvetica where it exists (macOS/iOS); Arial and Liberation Sans
+     are metrically identical stand-ins elsewhere, so nothing reflows.
+     No webfont request — the first paint is already in the right face. */
+  --font-helvetica: "Helvetica Neue", Helvetica, Arial, "Liberation Sans",
+    system-ui, sans-serif;
 }
 
 @theme inline {
@@ -29,8 +35,8 @@
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
-  --font-display: var(--font-display);
-  --font-sans: var(--font-sans);
+  --font-display: var(--font-helvetica);
+  --font-sans: var(--font-helvetica);
 }
 
 html {
@@ -41,34 +47,39 @@ html {
 body {
   background: var(--bone);
   color: var(--ink);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-helvetica);
+  /* Set in CSS, not in the copy: the DOM text keeps its real capitalisation
+     for screen readers, alt text and search engines. */
+  text-transform: lowercase;
+}
+
+/* Form controls don't inherit text-transform from the UA stylesheet, so
+   button labels would keep their capitals. Pull them back into line. */
+button,
+input,
+select,
+textarea {
+  text-transform: inherit;
 }
 
 /* Editorial micro-label used throughout the UI */
 .eyebrow {
   font-size: 0.6875rem;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
 /* The light the garments stand in */
 .stage-backdrop {
-  background:
-    radial-gradient(
-      62% 48% at 50% 34%,
-      var(--stage-light) 0%,
-      transparent 72%
-    ),
-    linear-gradient(to bottom, var(--paper) 0%, var(--bone) 58%, var(--stage-floor) 100%);
+  background: #ffffff;
 }
 
 /* Contact shadow beneath the cutout */
 .stage-shadow {
   background: radial-gradient(
     50% 50% at 50% 50%,
-    rgba(28, 26, 23, 0.26) 0%,
-    rgba(28, 26, 23, 0.1) 45%,
+    rgba(0, 0, 0, 0.14) 0%,
+    rgba(0, 0, 0, 0.04) 45%,
     transparent 72%
   );
 }

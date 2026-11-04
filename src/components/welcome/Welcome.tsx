@@ -49,7 +49,7 @@ export function Welcome({ onEnter, teasers, hidden }: Props) {
         <motion.h1
           variants={rise}
           transition={{ duration: 0.7, ease }}
-          className="font-display text-[clamp(2.75rem,9vw,7rem)] leading-[0.95] tracking-[-0.02em] text-balance"
+          className="font-display text-[clamp(2.75rem,9vw,7rem)] leading-[0.92] tracking-[-0.045em] text-balance"
         >
           {studio.tagline}
         </motion.h1>
@@ -87,7 +87,8 @@ export function Welcome({ onEnter, teasers, hidden }: Props) {
       >
         <p className="eyebrow flex items-center gap-2">
           <ArrowDownIcon className="size-3.5" />
-          Scroll to enter
+          <span className="sm:hidden">Swipe up to enter</span>
+          <span className="hidden sm:inline">Scroll to enter</span>
         </p>
 
         {/* a glimpse of what is behind the curtain */}
@@ -105,6 +106,7 @@ export function Welcome({ onEnter, teasers, hidden }: Props) {
                 width={garment.views.front.width}
                 height={garment.views.front.height}
                 sizes="80px"
+                priority={i === 0}
                 className="h-14 w-auto object-contain sm:h-20"
               />
             </motion.li>
