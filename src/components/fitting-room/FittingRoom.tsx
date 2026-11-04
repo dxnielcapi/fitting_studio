@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Garment } from "@/lib/types";
+import { garmentsBySlot } from "@/data/garments";
 import { useGarmentView } from "@/lib/hooks/useGarmentView";
 import { useRoomKeys } from "@/lib/hooks/useRoomKeys";
 import { useDragRotate } from "@/lib/hooks/useDragRotate";
@@ -9,7 +10,6 @@ import { studio } from "@/data/studio";
 import { SocialLinks } from "@/components/welcome/SocialLinks";
 import { GarmentStage } from "./GarmentStage";
 import { ViewSwitcher } from "./ViewSwitcher";
-import { GarmentRail } from "./GarmentRail";
 import { GarmentDetails } from "./GarmentDetails";
 import { ViewPreloader } from "./ViewPreloader";
 
@@ -22,61 +22,95 @@ type Props = {
 };
 
 export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
-  const startIndex = Math.max(
-    0,
-    garments.findIndex((g) => g.slug === initialSlug),
+  const tshirts = useMemo(
+    () => garmentsBySlot(garments, "tshirt"),
+    [garments],
   );
-  const [index, setIndex] = useState(startIndex);
-  const garment = garments[index];
+  const joggers = useMemo(
+    () => garmentsBySlot(garments, "jogger"),
+    [garments],
+  );
+
+  const initialTshirtIndex = Math.max(
+    0,
+    tshirts.findIndex((g) => g.slug === initialSlug),
+  );
+  const initialJoggerIndex = Math.max(
+    0,
+    joggers.findIndex((g) => g.slug === initialSlug),
+  );
+
+  const [tshirtIndex, setTshirtIndex] = useState(initialTshirtIndex);
+  const [joggerIndex, setJoggerIndex] = useState(initialJoggerIndex);
+  const [tshirtDir, setTshirtDir] = useState<1 | -1>(1);
+  const [joggerDir, setJoggerDir] = useState<1 | -1>(1);
+
+  const tshirt = tshirts[tshirtIndex] ?? garments[0];
+  const jogger = joggers[joggerIndex] ?? garments[0];
 
   const { view, setView, rotate } = useGarmentView("front");
   const { dragOffset, dragHandlers } = useDragRotate(rotate);
 
-  const stepGarment = useCallback(
+  const stepTshirt = useCallback(
     (step: 1 | -1) => {
-      setIndex((current) => (current + step + garments.length) % garments.length);
+      if (tshirts.length === 0) return;
+      setTshirtDir(step);
+      setTshirtIndex(
+        (current) => (current + step + tshirts.length) % tshirts.length,
+      );
     },
-    [garments.length],
+    [tshirts.length],
   );
 
-  const selectBySlug = useCallback(
-    (slug: string) => {
-      const next = garments.findIndex((g) => g.slug === slug);
-      if (next >= 0) setIndex(next);
+  const stepJogger = useCallback(
+    (step: 1 | -1) => {
+      if (joggers.length === 0) return;
+      setJoggerDir(step);
+      setJoggerIndex(
+        (current) => (current + step + joggers.length) % joggers.length,
+      );
     },
-    [garments],
+    [joggers.length],
   );
+
+  const randomizeOutfit = useCallback(() => {
+    setTshirtDir(1);
+    setJoggerDir(1);
+    if (tshirts.length > 1) {
+      setTshirtIndex((current) => {
+        const offset = 1 + Math.floor(Math.random() * (tshirts.length - 1));
+        return (current + offset) % tshirts.length;
+      });
+    }
+    if (joggers.length > 1) {
+      setJoggerIndex((current) => {
+        const offset = 1 + Math.floor(Math.random() * (joggers.length - 1));
+        return (current + offset) % joggers.length;
+      });
+    }
+  }, [tshirts.length, joggers.length]);
 
   useRoomKeys({
     enabled: active,
     onRotate: rotate,
     onSetView: setView,
-    onGarmentStep: stepGarment,
+    onGarmentStep: stepTshirt,
   });
 
-  // Keep ?g=<slug> in the URL so a look stays shareable without a route change.
+  // Keep ?g=<tshirt-slug> in the URL so a look stays shareable without a route change.
   useEffect(() => {
-    if (!active) return;
+    if (!active || !tshirt) return;
     const url = new URL(window.location.href);
-    url.searchParams.set("g", garment.slug);
+    url.searchParams.set("g", tshirt.slug);
     window.history.replaceState(null, "", url);
-  }, [active, garment.slug]);
-
-  // Neighbours of the current garment, warmed while the browser is idle.
-  const neighbours = useMemo(() => {
-    const { length } = garments;
-    if (length < 2) return [];
-    const picks = new Set([(index + 1) % length, (index - 1 + length) % length]);
-    picks.delete(index);
-    return [...picks].map((i) => garments[i]);
-  }, [garments, index]);
+  }, [active, tshirt]);
 
   return (
     <section
       id="fitting-room"
       tabIndex={-1}
       aria-label="Virtual fitting room"
-      className="relative flex min-h-dvh flex-col px-5 py-6 sm:px-8 lg:px-12"
+      className="relative flex min-h-dvh flex-col bg-white px-5 py-6 sm:px-8 lg:px-12"
     >
       <header className="flex items-center justify-between gap-4">
         <button
@@ -86,35 +120,46 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
         >
           {studio.name}
         </button>
-        <p className="eyebrow hidden sm:block">Fitting room</p>
+        <p className="eyebrow hidden sm:block">Stickman Fitting Room</p>
       </header>
 
       <div className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-        {/* the stage */}
+        {/* the stage: stickman + worn clothes + angle bar */}
         <div className="flex flex-col gap-5">
           <GarmentStage
-            garment={garment}
+            tshirt={tshirt}
+            jogger={jogger}
+            tshirtDir={tshirtDir}
+            joggerDir={joggerDir}
+            onStepTshirt={stepTshirt}
+            onStepJogger={stepJogger}
+            onRandomize={randomizeOutfit}
             view={view}
             dragOffset={dragOffset}
             dragHandlers={dragHandlers}
           />
           <ViewSwitcher view={view} onSetView={setView} onRotate={rotate} />
           <p className="hidden text-center text-xs text-ink-faint lg:block">
-            <kbd className="font-sans">←</kbd> <kbd className="font-sans">→</kbd>{" "}
-            turn · <kbd className="font-sans">↑</kbd>{" "}
-            <kbd className="font-sans">↓</kbd> change piece ·{" "}
-            <kbd className="font-sans">1</kbd>–<kbd className="font-sans">4</kbd>{" "}
-            jump to a view
+            Slide the bar or press <kbd className="font-sans">←</kbd>{" "}
+            <kbd className="font-sans">→</kbd> to rotate · Push the arrows to
+            slide clothes left to right
           </p>
         </div>
 
-        {/* the details */}
-        <div className="flex flex-col gap-8">
-          <GarmentDetails garment={garment} />
-          <GarmentRail
-            garments={garments}
-            activeSlug={garment.slug}
-            onSelect={selectBySlug}
+        {/* the active outfit controls & details (no catalog grid) */}
+        <div className="flex flex-col gap-6">
+          <GarmentDetails
+            tshirt={tshirt}
+            jogger={jogger}
+            tshirtDir={tshirtDir}
+            joggerDir={joggerDir}
+            tshirtIndex={tshirtIndex}
+            tshirtTotal={tshirts.length}
+            joggerIndex={joggerIndex}
+            joggerTotal={joggers.length}
+            onStepTshirt={stepTshirt}
+            onStepJogger={stepJogger}
+            onRandomize={randomizeOutfit}
           />
         </div>
       </div>
@@ -126,7 +171,7 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
         <SocialLinks />
       </footer>
 
-      {active ? <ViewPreloader garments={neighbours} /> : null}
+      {active ? <ViewPreloader garments={garments} /> : null}
     </section>
   );
 }

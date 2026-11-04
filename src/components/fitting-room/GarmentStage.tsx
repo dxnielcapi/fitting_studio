@@ -2,10 +2,14 @@
 
 import Image from "next/image";
 import type { PointerEventHandler } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import type { Garment, ViewKey } from "@/lib/types";
 import { VIEW_BUTTON_ORDER, VIEW_LABELS, rotationDelta } from "@/lib/views";
+import { ChevronIcon, ShuffleIcon } from "@/components/ui/Icons";
+import { StickmanFigure } from "./StickmanFigure";
 
-export const STAGE_SIZES = "(max-width: 640px) 78vw, (max-width: 1024px) 46vw, 460px";
+export const STAGE_SIZES =
+  "(max-width: 640px) 78vw, (max-width: 1024px) 46vw, 460px";
 
 type DragHandlers = {
   onPointerDown: PointerEventHandler;
@@ -16,38 +20,71 @@ type DragHandlers = {
 };
 
 type Props = {
-  garment: Garment;
+  tshirt: Garment;
+  jogger: Garment;
+  tshirtDir: 1 | -1;
+  joggerDir: 1 | -1;
+  onStepTshirt: (dir: 1 | -1) => void;
+  onStepJogger: (dir: 1 | -1) => void;
+  onRandomize: () => void;
   view: ViewKey;
   dragOffset: number;
   dragHandlers: DragHandlers;
 };
 
+const slideVariants = {
+  enter: (dir: number) => ({
+    x: dir > 0 ? 180 : -180,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (dir: number) => ({
+    x: dir > 0 ? -180 : 180,
+    opacity: 0,
+  }),
+};
+
 /**
- * The viewport. All four views of the active garment are mounted at once and
- * only opacity/transform animate, so rotating never reflows and never flashes.
+ * The stickman fitting stage. Renders the stickman figure across all four views
+ * with layered t-shirt and jogger cutouts that slide horizontally (left to right)
+ * when the user pushes the slot buttons.
  */
-export function GarmentStage({ garment, view, dragOffset, dragHandlers }: Props) {
+export function GarmentStage({
+  tshirt,
+  jogger,
+  tshirtDir,
+  joggerDir,
+  onStepTshirt,
+  onStepJogger,
+  onRandomize,
+  view,
+  dragOffset,
+  dragHandlers,
+}: Props) {
   const dragging = dragOffset !== 0;
 
   return (
     <div
       {...dragHandlers}
       role="group"
-      aria-label={`${garment.name}, ${VIEW_LABELS[view].toLowerCase()} view. Drag or use the arrow keys to turn it.`}
-      className="group relative mx-auto w-full max-w-[460px] touch-none select-none"
+      aria-label={`Stickman wearing ${tshirt.name} and ${jogger.name}, ${VIEW_LABELS[view].toLowerCase()} view.`}
+      className="group relative mx-auto w-full max-w-[min(460px,52dvh)] touch-pan-y select-none lg:max-w-[min(440px,56dvh)]"
       style={{ cursor: dragging ? "grabbing" : "grab" }}
     >
-      <div className="stage-backdrop relative aspect-3/4 overflow-hidden rounded-[2rem] ring-1 ring-line/70">
-        {/* floor line */}
+      <div className="stage-backdrop relative aspect-3/4 overflow-hidden rounded-[2rem] border border-line bg-white">
+        {/* subtle floor line */}
         <div
-          className="absolute inset-x-0 bottom-[14%] h-px bg-ink/8"
+          className="absolute inset-x-10 bottom-[10%] h-px bg-line"
           aria-hidden="true"
         />
 
-        {/* contact shadow */}
+        {/* contact shadow beneath the stickman */}
         <div
           aria-hidden="true"
-          className="stage-shadow absolute bottom-[10%] left-1/2 h-[6%] w-[52%] -translate-x-1/2 transition-transform duration-500"
+          className="stage-shadow absolute bottom-[7.5%] left-1/2 h-[5%] w-[48%] -translate-x-1/2 transition-transform duration-500"
           style={{
             transform: `translate3d(calc(-50% + ${dragOffset * 0.3}px), 0, 0) scaleX(${
               view === "left" || view === "right" ? 0.68 : 1
@@ -57,54 +94,159 @@ export function GarmentStage({ garment, view, dragOffset, dragHandlers }: Props)
           }}
         />
 
-        {/* the four views */}
+        {/* the four views of the stickman + layered garments */}
         {VIEW_BUTTON_ORDER.map((key) => {
-          const image = garment.views[key];
           const delta = rotationDelta(view, key);
           const isActive = delta === 0;
+          const tshirtImg = tshirt.views[key];
+          const joggerImg = jogger.views[key];
 
           return (
             <div
               key={key}
               aria-hidden={!isActive}
-              className="absolute inset-0 flex items-end justify-center pb-[12%] will-change-[opacity,transform]"
+              className="pointer-events-none absolute inset-0 flex items-center justify-center will-change-[opacity,transform]"
               style={{
                 opacity: isActive ? 1 : 0,
                 transform: isActive
                   ? `translate3d(${dragOffset}px, 0, 0) scale(1)`
-                  : `translate3d(${delta > 0 ? 44 : -44}px, 0, 0) scale(0.97)`,
-                transition: dragging && isActive
-                  ? "none"
-                  : "opacity 380ms var(--ease-room), transform 540ms var(--ease-room)",
+                  : `translate3d(${delta > 0 ? 40 : -40}px, 0, 0) scale(0.98)`,
+                transition:
+                  dragging && isActive
+                    ? "none"
+                    : "opacity 340ms var(--ease-room), transform 500ms var(--ease-room)",
               }}
             >
-              <Image
-                src={image.src}
-                alt={isActive ? image.alt : ""}
-                width={image.width}
-                height={image.height}
-                sizes={STAGE_SIZES}
-                priority={key === "front"}
-                className="h-[82%] w-auto object-contain drop-shadow-[0_18px_28px_rgba(28,26,23,0.14)]"
-                draggable={false}
-              />
+              <div className="relative h-[88%] aspect-3/4">
+                {/* Base stickman body */}
+                <div className="absolute inset-0">
+                  <StickmanFigure view={key} />
+                </div>
+
+                {/* Jogger layer (bottom) — slides left/right */}
+                <AnimatePresence initial={false} custom={joggerDir} mode="popLayout">
+                  <motion.div
+                    key={`${jogger.slug}-${key}`}
+                    custom={joggerDir}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 320, damping: 32 },
+                      opacity: { duration: 0.2 },
+                    }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={joggerImg.src}
+                      alt={isActive ? joggerImg.alt : ""}
+                      width={joggerImg.width}
+                      height={joggerImg.height}
+                      sizes={STAGE_SIZES}
+                      priority={key === "front"}
+                      className="h-full w-full object-contain"
+                      draggable={false}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* T-Shirt layer (top) — slides left/right */}
+                <AnimatePresence initial={false} custom={tshirtDir} mode="popLayout">
+                  <motion.div
+                    key={`${tshirt.slug}-${key}`}
+                    custom={tshirtDir}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 320, damping: 32 },
+                      opacity: { duration: 0.2 },
+                    }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={tshirtImg.src}
+                      alt={isActive ? tshirtImg.alt : ""}
+                      width={tshirtImg.width}
+                      height={tshirtImg.height}
+                      sizes={STAGE_SIZES}
+                      priority={key === "front"}
+                      className="h-full w-full object-contain"
+                      draggable={false}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
           );
         })}
 
-        {/* which way you're looking */}
-        <p
-          aria-hidden="true"
-          className="eyebrow absolute top-5 left-6 transition-opacity duration-300"
+        {/* Minimalist left/right controls aligned to T-Shirt (upper body) */}
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
+          className="pointer-events-auto absolute inset-x-3 top-[34%] flex -translate-y-1/2 items-center justify-between"
         >
-          {VIEW_LABELS[view]}
-        </p>
-        <p
-          aria-hidden="true"
-          className="eyebrow absolute top-5 right-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          <button
+            type="button"
+            onClick={() => onStepTshirt(-1)}
+            aria-label="Previous t-shirt"
+            className="flex size-9 items-center justify-center rounded-full border border-line bg-white/90 text-ink transition-all duration-200 hover:border-ink hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            <ChevronIcon direction="left" className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onStepTshirt(1)}
+            aria-label="Next t-shirt"
+            className="flex size-9 items-center justify-center rounded-full border border-line bg-white/90 text-ink transition-all duration-200 hover:border-ink hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            <ChevronIcon direction="right" className="size-4" />
+          </button>
+        </div>
+
+        {/* Minimalist left/right controls aligned to Jogger (lower body) */}
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
+          className="pointer-events-auto absolute inset-x-3 top-[66%] flex -translate-y-1/2 items-center justify-between"
         >
-          Drag to turn
-        </p>
+          <button
+            type="button"
+            onClick={() => onStepJogger(-1)}
+            aria-label="Previous jogger"
+            className="flex size-9 items-center justify-center rounded-full border border-line bg-white/90 text-ink transition-all duration-200 hover:border-ink hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            <ChevronIcon direction="left" className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onStepJogger(1)}
+            aria-label="Next jogger"
+            className="flex size-9 items-center justify-center rounded-full border border-line bg-white/90 text-ink transition-all duration-200 hover:border-ink hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            <ChevronIcon direction="right" className="size-4" />
+          </button>
+        </div>
+
+        {/* Top bar inside stage: current angle label + Randomize button */}
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
+          className="absolute inset-x-5 top-4 flex items-center justify-between"
+        >
+          <p aria-hidden="true" className="eyebrow">
+            {VIEW_LABELS[view]}
+          </p>
+          <button
+            type="button"
+            onClick={onRandomize}
+            aria-label="Randomize outfit"
+            className="flex items-center gap-1.5 rounded-full border border-line bg-white/90 px-3 py-1.5 text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-ink transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            <ShuffleIcon className="size-3" />
+            <span>Random</span>
+          </button>
+        </div>
       </div>
     </div>
   );
