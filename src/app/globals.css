@@ -2,21 +2,21 @@
 
 /* ---------------------------------------------------------------
    syle.studio — design tokens
-   A warm, light studio: bone walls, a pool of light, soft shadow.
-   Committed single palette; the room is meant to look like a room.
+   Pure white studio: crisp white backdrop, clean neutral lines,
+   minimalist contrast.
    --------------------------------------------------------------- */
 :root {
-  --bone: #f4f1ea;
-  --bone-deep: #e8e3d8;
-  --paper: #fbfaf7;
-  --ink: #1c1a17;
-  --ink-soft: #55504a;
-  --ink-faint: #8d867c;
-  --line: #ddd7c9;
-  --accent: #1c1a17;
+  --bone: #ffffff;
+  --bone-deep: #fafafa;
+  --paper: #ffffff;
+  --ink: #111111;
+  --ink-soft: #525252;
+  --ink-faint: #8a8a8a;
+  --line: #e5e5e5;
+  --accent: #111111;
 
-  --stage-floor: #e2dccd;
-  --stage-light: #fdfcf9;
+  --stage-floor: #ffffff;
+  --stage-light: #ffffff;
 
   --ease-room: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -54,21 +54,15 @@ body {
 
 /* The light the garments stand in */
 .stage-backdrop {
-  background:
-    radial-gradient(
-      62% 48% at 50% 34%,
-      var(--stage-light) 0%,
-      transparent 72%
-    ),
-    linear-gradient(to bottom, var(--paper) 0%, var(--bone) 58%, var(--stage-floor) 100%);
+  background: #ffffff;
 }
 
 /* Contact shadow beneath the cutout */
 .stage-shadow {
   background: radial-gradient(
     50% 50% at 50% 50%,
-    rgba(28, 26, 23, 0.26) 0%,
-    rgba(28, 26, 23, 0.1) 45%,
+    rgba(0, 0, 0, 0.14) 0%,
+    rgba(0, 0, 0, 0.04) 45%,
     transparent 72%
   );
 }
