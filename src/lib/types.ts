@@ -1,12 +1,21 @@
 /** The four canonical views every garment must provide. */
 export type ViewKey = "front" | "back" | "left" | "right";
 
-export type GarmentCategory =
-  | "outerwear"
-  | "top"
-  | "bottom"
-  | "dress"
+/**
+ * Equipment slots on the stickman figure.
+ * Active right now: "tshirt" and "jogger".
+ * Prepared for future expansion: "shoes", "totebag", "accessory".
+ */
+export type GarmentSlot =
+  | "tshirt"
+  | "jogger"
+  | "shoes"
+  | "totebag"
   | "accessory";
+
+export type ActiveSlot = "tshirt" | "jogger";
+
+export type GarmentCategory = GarmentSlot;
 
 export type GarmentImage = {
   /** Path under /public — cutout with a transparent background. */
