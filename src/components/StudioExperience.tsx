@@ -61,11 +61,29 @@ export function StudioExperience({ garments }: { garments: Garment[] }) {
       }
     }
 
+    // Touch has no wheel event — a swipe up lifts the curtain instead.
+    let touchStart: number | null = null;
+    function onTouchStart(event: TouchEvent) {
+      touchStart = event.touches[0]?.clientY ?? null;
+    }
+    function onTouchMove(event: TouchEvent) {
+      if (touchStart === null) return;
+      const dy = touchStart - (event.touches[0]?.clientY ?? touchStart);
+      if (dy > 40) {
+        touchStart = null;
+        enter();
+      }
+    }
+
     window.addEventListener("wheel", onWheel, { passive: true });
     window.addEventListener("keydown", onKey);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKey);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
     };
   }, [entered, enter]);
 
