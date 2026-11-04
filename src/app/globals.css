@@ -19,6 +19,12 @@
   --stage-light: #ffffff;
 
   --ease-room: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Real Helvetica where it exists (macOS/iOS); Arial and Liberation Sans
+     are metrically identical stand-ins elsewhere, so nothing reflows.
+     No webfont request — the first paint is already in the right face. */
+  --font-helvetica: "Helvetica Neue", Helvetica, Arial, "Liberation Sans",
+    system-ui, sans-serif;
 }
 
 @theme inline {
@@ -29,8 +35,8 @@
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
-  --font-display: var(--font-display);
-  --font-sans: var(--font-sans);
+  --font-display: var(--font-helvetica);
+  --font-sans: var(--font-helvetica);
 }
 
 html {
@@ -41,14 +47,25 @@ html {
 body {
   background: var(--bone);
   color: var(--ink);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-helvetica);
+  /* Set in CSS, not in the copy: the DOM text keeps its real capitalisation
+     for screen readers, alt text and search engines. */
+  text-transform: lowercase;
+}
+
+/* Form controls don't inherit text-transform from the UA stylesheet, so
+   button labels would keep their capitals. Pull them back into line. */
+button,
+input,
+select,
+textarea {
+  text-transform: inherit;
 }
 
 /* Editorial micro-label used throughout the UI */
 .eyebrow {
   font-size: 0.6875rem;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 

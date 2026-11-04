@@ -138,7 +138,7 @@ export function GarmentDetails({
         <button
           type="button"
           onClick={onRandomize}
-          className="flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-xs font-medium tracking-[0.12em] uppercase text-ink transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          className="flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-xs font-medium tracking-[0.12em] text-ink transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
           <ShuffleIcon className="size-3.5" />
           <span>Randomize</span>
