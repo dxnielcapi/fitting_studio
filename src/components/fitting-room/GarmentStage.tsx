@@ -37,7 +37,7 @@ type Props = {
 
 const slideVariants = {
   enter: (dir: number) => ({
-    x: dir > 0 ? 180 : -180,
+    x: dir > 0 ? 130 : -130,
     opacity: 0,
   }),
   center: {
@@ -45,7 +45,7 @@ const slideVariants = {
     opacity: 1,
   },
   exit: (dir: number) => ({
-    x: dir > 0 ? -180 : 180,
+    x: dir > 0 ? -130 : 130,
     opacity: 0,
   }),
 };
@@ -118,7 +118,7 @@ export function GarmentStage({
                     transform: `translate3d(${(pose.hipX / 900) * 100}%, ${(pose.hipY / 1200) * 100}%, 0)`,
                   }}
                 >
-                  <AnimatePresence initial={false} custom={joggerDir} mode="wait">
+                  <AnimatePresence initial={false} custom={joggerDir}>
                     <motion.div
                       key={`${jogger.slug}-${key}`}
                       custom={joggerDir}
@@ -127,8 +127,8 @@ export function GarmentStage({
                       animate="center"
                       exit="exit"
                       transition={{
-                        x: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
-                        opacity: { duration: 0.15 },
+                        x: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
+                        opacity: { duration: 0.34, ease: "linear" },
                       }}
                       className="absolute inset-0"
                     >
@@ -153,7 +153,7 @@ export function GarmentStage({
                     transform: `translate3d(${(pose.torsoX / 900) * 100}%, ${((pose.torsoY + (pose.shoulderLY + pose.shoulderRY) * 0.25) / 1200) * 100}%, 0)`,
                   }}
                 >
-                  <AnimatePresence initial={false} custom={tshirtDir} mode="wait">
+                  <AnimatePresence initial={false} custom={tshirtDir}>
                     <motion.div
                       key={`${tshirt.slug}-${key}`}
                       custom={tshirtDir}
@@ -162,8 +162,8 @@ export function GarmentStage({
                       animate="center"
                       exit="exit"
                       transition={{
-                        x: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
-                        opacity: { duration: 0.15 },
+                        x: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
+                        opacity: { duration: 0.34, ease: "linear" },
                       }}
                       className="absolute inset-0"
                     >

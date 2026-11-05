@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Garment } from "@/lib/types";
 import { garmentsBySlot } from "@/data/garments";
 import { useGarmentView } from "@/lib/hooks/useGarmentView";
@@ -54,9 +54,18 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
   const { view, setView, rotate } = useGarmentView("front");
   const { dragOffset, dragHandlers } = useDragRotate(rotate);
 
+  // One slide at a time per slot. Without this, clicks landing mid-slide stack
+  // up extra outgoing layers — the ghosting this used to have. Read in an event
+  // handler, never during render.
+  const lastStep = useRef({ tshirt: 0, jogger: 0 });
+  const SLIDE_MS = 340;
+
   const stepTshirt = useCallback(
     (step: 1 | -1) => {
       if (tshirts.length === 0) return;
+      const now = performance.now();
+      if (now - lastStep.current.tshirt < SLIDE_MS) return;
+      lastStep.current.tshirt = now;
       setTshirtDir(step);
       setTshirtCount((c) => c + 1);
       setTshirtIndex(
@@ -69,6 +78,9 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
   const stepJogger = useCallback(
     (step: 1 | -1) => {
       if (joggers.length === 0) return;
+      const now = performance.now();
+      if (now - lastStep.current.jogger < SLIDE_MS) return;
+      lastStep.current.jogger = now;
       setJoggerDir(step);
       setJoggerCount((c) => c + 1);
       setJoggerIndex(

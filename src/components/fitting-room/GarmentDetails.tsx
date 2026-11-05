@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Garment } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
@@ -23,6 +23,21 @@ export function GarmentDetails({
   joggerDir,
 }: Props) {
   const [open, setOpen] = useState(false);
+  // Height of the panel on the previous frame, so we can scroll by exactly how
+  // much it grew or shrank. Survives the panel unmounting.
+  const lastHeight = useRef(0);
+
+  // The view follows the panel frame by frame as it unfolds, instead of waiting
+  // for the expand to finish and then scrolling — that read as two moves with a
+  // pause between them. Scrolling by the same delta the page grew keeps the
+  // panel in view as one continuous motion, and reverses exactly on close.
+  function followHeight(latest: { height?: number | string }) {
+    const h = typeof latest.height === "number" ? latest.height : null;
+    if (h === null) return;
+    const delta = h - lastHeight.current;
+    lastHeight.current = h;
+    if (delta !== 0) window.scrollBy(0, delta);
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col items-center text-center">
@@ -80,6 +95,7 @@ export function GarmentDetails({
         {open ? (
           <motion.div
             key="details-panel"
+            onUpdate={followHeight}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
