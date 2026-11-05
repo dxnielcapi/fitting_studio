@@ -1,10 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import { motion } from "motion/react";
-import type { Garment } from "@/lib/types";
+import { motion, useReducedMotion } from "motion/react";
 import { studio } from "@/data/studio";
-import { SocialLinks } from "./SocialLinks";
 import { ArrowDownIcon } from "@/components/ui/Icons";
 
 const rise = {
@@ -16,34 +13,28 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 type Props = {
   onEnter: () => void;
-  teasers: Garment[];
   hidden: boolean;
 };
 
-export function Welcome({ onEnter, teasers, hidden }: Props) {
+export function Welcome({ onEnter, hidden }: Props) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <motion.div
       initial="hidden"
       animate="show"
       transition={{ staggerChildren: 0.08, delayChildren: 0.1 }}
-      className="stage-backdrop relative flex h-dvh flex-col justify-between overflow-hidden px-5 py-8 sm:px-8 lg:px-12"
+      className="stage-backdrop relative flex h-dvh flex-col overflow-hidden px-5 pt-24 pb-8 sm:px-8 lg:px-12"
     >
-      <motion.header
-        variants={rise}
-        transition={{ duration: 0.6, ease }}
-        className="flex items-center justify-between"
-      >
-        <p className="font-display text-lg tracking-tight">{studio.name}</p>
-        <p className="eyebrow hidden sm:block">{studio.year}</p>
-      </motion.header>
+      {/* The brand and the social links live in the nav bar above this. */}
 
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center">
         <motion.p
           variants={rise}
           transition={{ duration: 0.6, ease }}
           className="eyebrow mb-6"
         >
-          Virtual fitting room
+          Probador virtual
         </motion.p>
 
         <motion.h1
@@ -61,58 +52,41 @@ export function Welcome({ onEnter, teasers, hidden }: Props) {
         >
           {studio.intro}
         </motion.p>
-
-        <motion.div
-          variants={rise}
-          transition={{ duration: 0.6, ease }}
-          className="mt-9 flex flex-wrap items-center gap-4"
-        >
-          <button
-            type="button"
-            onClick={onEnter}
-            tabIndex={hidden ? -1 : 0}
-            className="group flex items-center gap-3 rounded-full bg-ink px-7 py-3.5 text-sm font-medium tracking-wide text-paper transition-transform duration-300 hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
-          >
-            Enter the fitting room
-            <ArrowDownIcon className="size-4 transition-transform duration-300 group-hover:translate-y-0.5" />
-          </button>
-          <SocialLinks />
-        </motion.div>
       </div>
 
-      <motion.footer
+      {/* Centred call to action at the foot of the hero */}
+      <motion.div
         variants={rise}
         transition={{ duration: 0.6, ease }}
-        className="flex items-end justify-between gap-6"
+        className="relative flex flex-col items-center gap-3"
       >
-        <p className="eyebrow flex items-center gap-2">
-          <ArrowDownIcon className="size-3.5" />
-          <span className="sm:hidden">Swipe up to enter</span>
-          <span className="hidden sm:inline">Scroll to enter</span>
+        <button
+          type="button"
+          onClick={onEnter}
+          tabIndex={hidden ? -1 : 0}
+          className="group flex items-center gap-3 rounded-full bg-ink px-8 py-4 text-sm font-medium tracking-wide text-white transition-transform duration-300 hover:scale-[1.03] active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+        >
+          Entrar al probador
+          <motion.span
+            aria-hidden="true"
+            className="flex"
+            animate={reduceMotion ? undefined : { y: [0, 5, 0] }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <ArrowDownIcon className="size-4" />
+          </motion.span>
+        </button>
+
+        <p className="eyebrow text-center">
+          <span className="sm:hidden">Desliza hacia arriba para entrar</span>
+          <span className="hidden sm:inline">Baja para entrar</span>
         </p>
 
-        {/* a glimpse of what is behind the curtain */}
-        <ul aria-hidden="true" className="flex items-end gap-1 sm:gap-3">
-          {teasers.map((garment, i) => (
-            <motion.li
-              key={garment.slug}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 0.5, y: 0 }}
-              transition={{ duration: 0.8, ease, delay: 0.5 + i * 0.12 }}
-            >
-              <Image
-                src={garment.views.front.src}
-                alt=""
-                width={garment.views.front.width}
-                height={garment.views.front.height}
-                sizes="80px"
-                priority={i === 0}
-                className="h-14 w-auto object-contain sm:h-20"
-              />
-            </motion.li>
-          ))}
-        </ul>
-      </motion.footer>
+      </motion.div>
     </motion.div>
   );
 }
