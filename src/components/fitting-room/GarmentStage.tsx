@@ -4,9 +4,9 @@ import Image from "next/image";
 import type { PointerEventHandler } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Garment, ViewKey } from "@/lib/types";
-import { VIEW_BUTTON_ORDER, VIEW_LABELS, rotationDelta } from "@/lib/views";
+import { VIEW_ALT, VIEW_BUTTON_ORDER, rotationDelta } from "@/lib/views";
 import { ChevronIcon, ShuffleIcon } from "@/components/ui/Icons";
-import { StickmanFigure } from "./StickmanFigure";
+import { StickmanFigure, useStickmanPose } from "./StickmanFigure";
 
 export const STAGE_SIZES =
   "(max-width: 640px) 78vw, (max-width: 1024px) 46vw, 460px";
@@ -24,6 +24,9 @@ type Props = {
   jogger: Garment;
   tshirtDir: 1 | -1;
   joggerDir: 1 | -1;
+  randomCount: number;
+  tshirtCount: number;
+  joggerCount: number;
   onStepTshirt: (dir: 1 | -1) => void;
   onStepJogger: (dir: 1 | -1) => void;
   onRandomize: () => void;
@@ -48,15 +51,18 @@ const slideVariants = {
 };
 
 /**
- * Borderless centered stickman fitting stage. Renders the stickman figure across
- * all four views with layered t-shirt and jogger cutouts that slide horizontally
- * (left to right) when the user pushes the slot buttons.
+ * Borderless centered stickman fitting stage. Renders the connected stickman
+ * skeleton across all four views with layered t-shirt and jogger cutouts that
+ * slide horizontally (left to right) and follow the stickman's subtle posture.
  */
 export function GarmentStage({
   tshirt,
   jogger,
   tshirtDir,
   joggerDir,
+  randomCount,
+  tshirtCount,
+  joggerCount,
   onStepTshirt,
   onStepJogger,
   onRandomize,
@@ -65,29 +71,17 @@ export function GarmentStage({
   dragHandlers,
 }: Props) {
   const dragging = dragOffset !== 0;
+  const pose = useStickmanPose({ randomCount, tshirtCount, joggerCount });
 
   return (
     <div
       {...dragHandlers}
       role="group"
-      aria-label={`Stickman wearing ${tshirt.name} and ${jogger.name}, ${VIEW_LABELS[view].toLowerCase()} view.`}
-      className="group relative mx-auto w-full max-w-[min(440px,48dvh)] touch-pan-y select-none"
+      aria-label={`Figura con ${tshirt.name} y ${jogger.name}, vista ${VIEW_ALT[view]}.`}
+      className="group relative mx-auto w-full max-w-[min(440px,48dvh)] touch-pan-y select-none lg:max-w-[min(560px,49dvh)] xl:max-w-[min(640px,50dvh)] 2xl:max-w-[min(720px,51dvh)]"
       style={{ cursor: dragging ? "grabbing" : "grab" }}
     >
       <div className="relative aspect-3/4 overflow-visible bg-white">
-        {/* contact shadow beneath the stickman */}
-        <div
-          aria-hidden="true"
-          className="stage-shadow absolute bottom-[6%] left-1/2 h-[4.5%] w-[44%] -translate-x-1/2 transition-transform duration-500"
-          style={{
-            transform: `translate3d(calc(-50% + ${dragOffset * 0.3}px), 0, 0) scaleX(${
-              view === "left" || view === "right" ? 0.68 : 1
-            })`,
-            transitionDuration: dragging ? "0ms" : "520ms",
-            transitionTimingFunction: "var(--ease-room)",
-          }}
-        />
-
         {/* the four views of the stickman + layered garments */}
         {VIEW_BUTTON_ORDER.map((key) => {
           const delta = rotationDelta(view, key);
@@ -112,66 +106,80 @@ export function GarmentStage({
               }}
             >
               <div className="relative h-[92%] aspect-3/4">
-                {/* Base stickman body */}
+                {/* Base connected stickman skeleton */}
                 <div className="absolute inset-0">
-                  <StickmanFigure view={key} />
+                  <StickmanFigure view={key} pose={pose} />
                 </div>
 
-                {/* Jogger layer (bottom) — slides left/right */}
-                <AnimatePresence initial={false} custom={joggerDir} mode="popLayout">
-                  <motion.div
-                    key={`${jogger.slug}-${key}`}
-                    custom={joggerDir}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      x: { type: "spring", stiffness: 320, damping: 32 },
-                      opacity: { duration: 0.2 },
-                    }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={joggerImg.src}
-                      alt={isActive ? joggerImg.alt : ""}
-                      width={joggerImg.width}
-                      height={joggerImg.height}
-                      sizes={STAGE_SIZES}
-                      priority={key === "front"}
-                      className="h-full w-full object-contain"
-                      draggable={false}
-                    />
-                  </motion.div>
-                </AnimatePresence>
+                {/* Jogger layer (bottom) — slides left/right and follows hip micro-movement */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    transform: `translate3d(${(pose.hipX / 900) * 100}%, ${(pose.hipY / 1200) * 100}%, 0)`,
+                  }}
+                >
+                  <AnimatePresence initial={false} custom={joggerDir} mode="wait">
+                    <motion.div
+                      key={`${jogger.slug}-${key}`}
+                      custom={joggerDir}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{
+                        x: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+                        opacity: { duration: 0.15 },
+                      }}
+                      className="absolute inset-0"
+                    >
+                      <Image
+                        src={joggerImg.src}
+                        alt={isActive ? joggerImg.alt : ""}
+                        width={joggerImg.width}
+                        height={joggerImg.height}
+                        sizes={STAGE_SIZES}
+                        priority={key === "front"}
+                        className="h-full w-full object-contain"
+                        draggable={false}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
 
-                {/* T-Shirt layer (top) — slides left/right */}
-                <AnimatePresence initial={false} custom={tshirtDir} mode="popLayout">
-                  <motion.div
-                    key={`${tshirt.slug}-${key}`}
-                    custom={tshirtDir}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      x: { type: "spring", stiffness: 320, damping: 32 },
-                      opacity: { duration: 0.2 },
-                    }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={tshirtImg.src}
-                      alt={isActive ? tshirtImg.alt : ""}
-                      width={tshirtImg.width}
-                      height={tshirtImg.height}
-                      sizes={STAGE_SIZES}
-                      priority={key === "front"}
-                      className="h-full w-full object-contain"
-                      draggable={false}
-                    />
-                  </motion.div>
-                </AnimatePresence>
+                {/* T-Shirt layer (top) — slides left/right and follows torso/shoulder micro-movement */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    transform: `translate3d(${(pose.torsoX / 900) * 100}%, ${((pose.torsoY + (pose.shoulderLY + pose.shoulderRY) * 0.25) / 1200) * 100}%, 0)`,
+                  }}
+                >
+                  <AnimatePresence initial={false} custom={tshirtDir} mode="wait">
+                    <motion.div
+                      key={`${tshirt.slug}-${key}`}
+                      custom={tshirtDir}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{
+                        x: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+                        opacity: { duration: 0.15 },
+                      }}
+                      className="absolute inset-0"
+                    >
+                      <Image
+                        src={tshirtImg.src}
+                        alt={isActive ? tshirtImg.alt : ""}
+                        width={tshirtImg.width}
+                        height={tshirtImg.height}
+                        sizes={STAGE_SIZES}
+                        priority={key === "front"}
+                        className="h-full w-full object-contain"
+                        draggable={false}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           );
@@ -185,7 +193,7 @@ export function GarmentStage({
           <button
             type="button"
             onClick={() => onStepTshirt(-1)}
-            aria-label="Previous t-shirt"
+            aria-label="Playera anterior"
             className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-all duration-200 hover:scale-110 hover:text-ink active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             <ChevronIcon direction="left" className="size-5" />
@@ -193,7 +201,7 @@ export function GarmentStage({
           <button
             type="button"
             onClick={() => onStepTshirt(1)}
-            aria-label="Next t-shirt"
+            aria-label="Playera siguiente"
             className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-all duration-200 hover:scale-110 hover:text-ink active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             <ChevronIcon direction="right" className="size-5" />
@@ -208,7 +216,7 @@ export function GarmentStage({
           <button
             type="button"
             onClick={() => onStepJogger(-1)}
-            aria-label="Previous jogger"
+            aria-label="Jogger anterior"
             className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-all duration-200 hover:scale-110 hover:text-ink active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             <ChevronIcon direction="left" className="size-5" />
@@ -216,7 +224,7 @@ export function GarmentStage({
           <button
             type="button"
             onClick={() => onStepJogger(1)}
-            aria-label="Next jogger"
+            aria-label="Jogger siguiente"
             className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-all duration-200 hover:scale-110 hover:text-ink active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             <ChevronIcon direction="right" className="size-5" />
@@ -231,11 +239,11 @@ export function GarmentStage({
           <button
             type="button"
             onClick={onRandomize}
-            aria-label="Randomize outfit"
-            className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-ink-faint transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            aria-label="Combinar al azar"
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.6875rem] font-medium tracking-[0.14em] text-ink-faint transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             <ShuffleIcon className="size-3.5" />
-            <span>Random</span>
+            <span>Al azar</span>
           </button>
         </div>
       </div>

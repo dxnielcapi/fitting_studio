@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Garment } from "@/lib/types";
 import { Welcome } from "@/components/welcome/Welcome";
 import { FittingRoom } from "@/components/fitting-room/FittingRoom";
+import { NavBar } from "@/components/layout/NavBar";
 
 /**
  * One route, two scenes. The welcome page is a curtain pinned over the fitting
@@ -16,6 +17,9 @@ export function StudioExperience({ garments }: { garments: Garment[] }) {
     entered: false,
   });
   const { entered, slug: initialSlug } = scene;
+
+  // The nav shows on the hero, and again once you reach the foot of the page.
+  const [atBottom, setAtBottom] = useState(false);
 
   const enter = useCallback(
     () => setScene((s) => ({ ...s, entered: true })),
@@ -87,16 +91,39 @@ export function StudioExperience({ garments }: { garments: Garment[] }) {
     };
   }, [entered, enter]);
 
+  // Is the page scrolled to its end? Only meaningful when there is something
+  // to scroll — if the room fits the viewport, top and bottom are the same
+  // place and the nav should stay away.
+  useEffect(() => {
+    function update() {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight > window.innerHeight + 24;
+      const reachedEnd =
+        window.scrollY + window.innerHeight >= doc.scrollHeight - 24;
+      setAtBottom(scrollable && reachedEnd);
+    }
+
+    // Measured in a callback, not synchronously in the effect body.
+    const id = requestAnimationFrame(update);
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [entered]);
+
   // Hand focus to the room so keyboard users follow the curtain.
   useEffect(() => {
     if (!entered) return;
     document.getElementById("fitting-room")?.focus({ preventScroll: true });
   }, [entered]);
 
-  const teasers = garments.filter((g) => g.featured).slice(0, 3);
-
   return (
     <>
+      <NavBar visible={!entered || atBottom} />
+
       <FittingRoom
         key={initialSlug ?? "default"}
         garments={garments}
@@ -115,7 +142,7 @@ export function StudioExperience({ garments }: { garments: Garment[] }) {
           boxShadow: "0 24px 60px rgba(28,26,23,0.18)",
         }}
       >
-        <Welcome onEnter={enter} teasers={teasers} hidden={entered} />
+        <Welcome onEnter={enter} hidden={entered} />
       </div>
     </>
   );

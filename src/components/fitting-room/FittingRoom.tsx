@@ -7,7 +7,6 @@ import { useGarmentView } from "@/lib/hooks/useGarmentView";
 import { useRoomKeys } from "@/lib/hooks/useRoomKeys";
 import { useDragRotate } from "@/lib/hooks/useDragRotate";
 import { studio } from "@/data/studio";
-import { SocialLinks } from "@/components/welcome/SocialLinks";
 import { GarmentStage } from "./GarmentStage";
 import { ViewSwitcher } from "./ViewSwitcher";
 import { GarmentDetails } from "./GarmentDetails";
@@ -44,6 +43,10 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
   const [joggerIndex, setJoggerIndex] = useState(initialJoggerIndex);
   const [tshirtDir, setTshirtDir] = useState<1 | -1>(1);
   const [joggerDir, setJoggerDir] = useState<1 | -1>(1);
+  const [randomCount, setRandomCount] = useState(0);
+  // Bump on every slot change; the stickman pose routines key off these.
+  const [tshirtCount, setTshirtCount] = useState(0);
+  const [joggerCount, setJoggerCount] = useState(0);
 
   const tshirt = tshirts[tshirtIndex] ?? garments[0];
   const jogger = joggers[joggerIndex] ?? garments[0];
@@ -55,6 +58,7 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
     (step: 1 | -1) => {
       if (tshirts.length === 0) return;
       setTshirtDir(step);
+      setTshirtCount((c) => c + 1);
       setTshirtIndex(
         (current) => (current + step + tshirts.length) % tshirts.length,
       );
@@ -66,6 +70,7 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
     (step: 1 | -1) => {
       if (joggers.length === 0) return;
       setJoggerDir(step);
+      setJoggerCount((c) => c + 1);
       setJoggerIndex(
         (current) => (current + step + joggers.length) % joggers.length,
       );
@@ -74,6 +79,7 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
   );
 
   const randomizeOutfit = useCallback(() => {
+    setRandomCount((c) => c + 1);
     setTshirtDir(1);
     setJoggerDir(1);
     if (tshirts.length > 1) {
@@ -109,8 +115,8 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
     <section
       id="fitting-room"
       tabIndex={-1}
-      aria-label="Virtual fitting room"
-      className="relative flex min-h-dvh flex-col bg-white px-5 py-6 sm:px-8 lg:px-12"
+      aria-label="Probador virtual"
+      className="relative flex min-h-dvh flex-col justify-between bg-white px-5 py-6 sm:px-8 lg:px-12 lg:py-4"
     >
       <header className="flex items-center justify-between gap-4">
         <button
@@ -120,55 +126,41 @@ export function FittingRoom({ garments, active, initialSlug, onExit }: Props) {
         >
           {studio.name}
         </button>
-        <p className="eyebrow hidden sm:block">Stickman Fitting Room</p>
+        <p className="eyebrow hidden sm:block">Probador</p>
       </header>
 
-      <div className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-        {/* the stage: stickman + worn clothes + angle bar */}
-        <div className="flex flex-col gap-5">
-          <GarmentStage
-            tshirt={tshirt}
-            jogger={jogger}
-            tshirtDir={tshirtDir}
-            joggerDir={joggerDir}
-            onStepTshirt={stepTshirt}
-            onStepJogger={stepJogger}
-            onRandomize={randomizeOutfit}
-            view={view}
-            dragOffset={dragOffset}
-            dragHandlers={dragHandlers}
-          />
-          <ViewSwitcher view={view} onSetView={setView} onRotate={rotate} />
-          <p className="hidden text-center text-xs text-ink-faint lg:block">
-            Slide the bar or press <kbd className="font-sans">←</kbd>{" "}
-            <kbd className="font-sans">→</kbd> to rotate · Push the arrows to
-            slide clothes left to right
-          </p>
-        </div>
+      {/* Centered fitting room: stickman + angle bar + bottom garment titles & details toggle */}
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-6 py-4 lg:max-w-3xl lg:gap-5 lg:py-0 xl:max-w-4xl 2xl:max-w-5xl">
+        <GarmentStage
+          tshirt={tshirt}
+          jogger={jogger}
+          tshirtDir={tshirtDir}
+          joggerDir={joggerDir}
+          randomCount={randomCount}
+          tshirtCount={tshirtCount}
+          joggerCount={joggerCount}
+          onStepTshirt={stepTshirt}
+          onStepJogger={stepJogger}
+          onRandomize={randomizeOutfit}
+          view={view}
+          dragOffset={dragOffset}
+          dragHandlers={dragHandlers}
+        />
 
-        {/* the active outfit controls & details (no catalog grid) */}
-        <div className="flex flex-col gap-6">
-          <GarmentDetails
-            tshirt={tshirt}
-            jogger={jogger}
-            tshirtDir={tshirtDir}
-            joggerDir={joggerDir}
-            tshirtIndex={tshirtIndex}
-            tshirtTotal={tshirts.length}
-            joggerIndex={joggerIndex}
-            joggerTotal={joggers.length}
-            onStepTshirt={stepTshirt}
-            onStepJogger={stepJogger}
-            onRandomize={randomizeOutfit}
-          />
-        </div>
+        <ViewSwitcher view={view} onSetView={setView} onRotate={rotate} />
+
+        <GarmentDetails
+          tshirt={tshirt}
+          jogger={jogger}
+          tshirtDir={tshirtDir}
+          joggerDir={joggerDir}
+        />
       </div>
 
-      <footer className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+      <footer className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 pt-4">
         <p className="eyebrow">
           © {studio.year} {studio.name}
         </p>
-        <SocialLinks />
       </footer>
 
       {active ? <ViewPreloader garments={garments} /> : null}

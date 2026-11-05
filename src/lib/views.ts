@@ -1,6 +1,6 @@
 import type { ViewKey } from "./types";
 
-/** Rotation order, as if walking around the garment clockwise. */
+/** Orden de giro, como si le dieras la vuelta a la prenda. */
 export const VIEW_ORDER: readonly ViewKey[] = [
   "front",
   "right",
@@ -9,10 +9,18 @@ export const VIEW_ORDER: readonly ViewKey[] = [
 ] as const;
 
 export const VIEW_LABELS: Record<ViewKey, string> = {
-  front: "Front",
-  back: "Back",
-  left: "Left",
-  right: "Right",
+  front: "Frente",
+  back: "Espalda",
+  left: "Izquierda",
+  right: "Derecha",
+};
+
+/** Frases para el texto alternativo: "vista de frente", "vista de perfil izquierdo". */
+export const VIEW_ALT: Record<ViewKey, string> = {
+  front: "de frente",
+  back: "de espalda",
+  left: "de perfil izquierdo",
+  right: "de perfil derecho",
 };
 
 /** Order the switcher buttons are displayed in (not the rotation order). */
@@ -59,7 +67,7 @@ export function viewsFor(
       view,
       {
         src: `/garments/${slug}/${view}.png`,
-        alt: `${name} — ${VIEW_LABELS[view].toLowerCase()} view`,
+        alt: `${name}, vista ${VIEW_ALT[view]}`,
         width,
         height,
       },
