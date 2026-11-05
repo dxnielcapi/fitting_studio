@@ -3,10 +3,17 @@
 import { motion, useReducedMotion } from "motion/react";
 import { studio } from "@/data/studio";
 import { ArrowDownIcon } from "@/components/ui/Icons";
+import { CursorSmoke } from "@/components/welcome/CursorSmoke";
+import { LogoTrace } from "@/components/welcome/LogoTrace";
 
 const rise = {
   hidden: { opacity: 0, y: 18 },
   show: { opacity: 1, y: 0 },
+};
+
+const fade = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1 },
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -28,7 +35,19 @@ export function Welcome({ onEnter, hidden }: Props) {
     >
       {/* The brand and the social links live in the nav bar above this. */}
 
-      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center">
+      {/* One oversized mark, drawn by a travelling hairline. Sits under
+          everything and takes no clicks. */}
+      <motion.div
+        variants={fade}
+        transition={{ duration: 1.4, ease, delay: 0.2 }}
+        className="absolute inset-0"
+      >
+        <LogoTrace />
+      </motion.div>
+
+      <CursorSmoke active={!hidden} />
+
+      <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center">
         <motion.p
           variants={rise}
           transition={{ duration: 0.6, ease }}
