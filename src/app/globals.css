@@ -74,16 +74,6 @@ textarea {
   background: #ffffff;
 }
 
-/* Contact shadow beneath the cutout */
-.stage-shadow {
-  background: radial-gradient(
-    50% 50% at 50% 50%,
-    rgba(0, 0, 0, 0.14) 0%,
-    rgba(0, 0, 0, 0.04) 45%,
-    transparent 72%
-  );
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
