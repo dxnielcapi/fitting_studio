@@ -22,7 +22,7 @@ export function ViewSwitcher({ view, onSetView, onRotate }: Props) {
         <button
           type="button"
           onClick={() => onRotate(-1)}
-          aria-label="Turn left"
+          aria-label="Girar a la izquierda"
           className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink-soft transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
           <ChevronIcon direction="left" className="size-4" />
@@ -40,8 +40,8 @@ export function ViewSwitcher({ view, onSetView, onRotate }: Props) {
               const next = VIEW_ORDER[nextIndex];
               if (next) onSetView(next);
             }}
-            aria-label="Rotate stickman angle left to right"
-            aria-valuetext={`${VIEW_LABELS[view]} view`}
+            aria-label="Gira la figura de izquierda a derecha"
+            aria-valuetext={`Vista ${VIEW_LABELS[view]}`}
             className="h-1 w-full cursor-pointer appearance-none rounded-full bg-line accent-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
           />
           <div className="flex justify-between px-0.5">
@@ -53,7 +53,7 @@ export function ViewSwitcher({ view, onSetView, onRotate }: Props) {
                   type="button"
                   onClick={() => onSetView(key)}
                   aria-pressed={active}
-                  className={`text-[0.625rem] tracking-[0.16em] uppercase transition-colors ${
+                  className={`text-[0.625rem] tracking-[0.16em] transition-colors ${
                     active
                       ? "font-semibold text-ink"
                       : "text-ink-faint hover:text-ink"
@@ -69,7 +69,7 @@ export function ViewSwitcher({ view, onSetView, onRotate }: Props) {
         <button
           type="button"
           onClick={() => onRotate(1)}
-          aria-label="Turn right"
+          aria-label="Girar a la derecha"
           className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink-soft transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
           <ChevronIcon direction="right" className="size-4" />

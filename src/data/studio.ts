@@ -7,23 +7,25 @@ export type Social = {
 
 export const studio = {
   name: "syle.studio",
-  // CONFIRM: wording is a placeholder — swap for your own.
-  tagline: "A creative studio for considered clothing",
+  city: "Ciudad de México",
+  // CONFIRM: el texto es provisional — cámbialo por el tuyo.
+  tagline: "Un estudio creativo de ropa pensada",
   intro:
-    "Every piece, seen from every side. Step into the fitting room and walk around the collection.",
+    "Cada prenda, vista por los cuatro lados. Entra al probador y dale la vuelta a la colección.",
+  madeIn: "Hecho en México",
   year: "2026",
   socials: [
     {
       label: "Instagram",
       handle: "@syle.studio",
-      // CONFIRM: real Instagram URL
+      // CONFIRM: URL real de Instagram
       href: "https://instagram.com/syle.studio",
       icon: "instagram",
     },
     {
-      label: "Website",
+      label: "Sitio web",
       handle: "syle.studio",
-      // CONFIRM: real domain
+      // CONFIRM: dominio real
       href: "https://syle.studio",
       icon: "globe",
     },

@@ -2,9 +2,9 @@ import type { ActiveSlot, Garment, GarmentSlot } from "@/lib/types";
 import { viewsFor } from "@/lib/views";
 
 /**
- * Equipment slots supported by the fitting room architecture.
- * Currently active in the UI: "tshirt" and "jogger".
- * Reserved for future releases: "shoes", "totebag", "accessory".
+ * Espacios de prenda que soporta el probador.
+ * Activos en la interfaz: "tshirt" y "jogger".
+ * Reservados para más adelante: "shoes", "totebag", "accessory".
  */
 export const ACTIVE_SLOTS: readonly ActiveSlot[] = ["tshirt", "jogger"] as const;
 
@@ -15,104 +15,107 @@ export const FUTURE_SLOTS: readonly Exclude<GarmentSlot, ActiveSlot>[] = [
 ] as const;
 
 export const SLOT_LABELS: Record<GarmentSlot, string> = {
-  tshirt: "T-Shirt",
+  tshirt: "Playera",
   jogger: "Jogger",
-  shoes: "Shoes",
-  totebag: "Tote Bag",
-  accessory: "Accessory",
+  shoes: "Tenis",
+  totebag: "Bolsa",
+  accessory: "Accesorio",
 };
 
 /**
- * The garment collection. Currently consists of t-shirts and joggers
- * positioned to layer cleanly over the stickman figure across all four views.
+ * La colección. Por ahora playeras y joggers, colocados para montarse
+ * limpiamente sobre la figura en las cuatro vistas.
+ *
+ * Los `slug` se quedan en inglés a propósito: son la ruta de los archivos
+ * en public/garments/<slug>/ y la URL que se comparte.
  */
 export const garments: Garment[] = [
   {
     slug: "box-tee-chalk",
-    name: "Box Tee",
-    collection: "Essentials",
+    name: "Playera Box",
+    collection: "Esenciales",
     category: "tshirt",
     description:
-      "Square through the body with a ribbed neck that holds its shape. Heavyweight compact cotton.",
-    colorway: "Chalk",
+      "Cuadrada de cuerpo, con cuello de rib que no se deforma. Algodón compacto y pesado.",
+    colorway: "Tiza",
     swatch: "#f2f2f0",
     sizes: ["XS", "S", "M", "L", "XL"],
-    materials: ["240gsm compact cotton"],
-    price: 85,
+    materials: ["Algodón compacto de 240 g/m²"],
+    price: 1290,
     featured: true,
-    views: viewsFor("box-tee-chalk", "Box Tee (Chalk)"),
+    views: viewsFor("box-tee-chalk", "Playera Box (Tiza)"),
   },
   {
     slug: "heavy-tee-onyx",
-    name: "Heavyweight Studio Tee",
-    collection: "Volume I",
+    name: "Playera Studio Pesada",
+    collection: "Volumen I",
     category: "tshirt",
     description:
-      "Dropped-shoulder boxy silhouette in pigment-dyed organic jersey. Crisp drape over the frame.",
-    colorway: "Onyx",
+      "Silueta amplia de hombro caído en jersey orgánico teñido en pigmento. Cae firme sobre el cuerpo.",
+    colorway: "Ónix",
     swatch: "#1c1c1c",
     sizes: ["S", "M", "L", "XL"],
-    materials: ["280gsm organic cotton jersey"],
-    price: 95,
+    materials: ["Jersey de algodón orgánico de 280 g/m²"],
+    price: 1490,
     featured: true,
-    views: viewsFor("heavy-tee-onyx", "Heavyweight Studio Tee (Onyx)"),
+    views: viewsFor("heavy-tee-onyx", "Playera Studio Pesada (Ónix)"),
   },
   {
     slug: "studio-tee-ash",
-    name: "Relaxed Crew Tee",
-    collection: "Essentials",
+    name: "Playera Cuello Redondo",
+    collection: "Esenciales",
     category: "tshirt",
     description:
-      "Soft brushed cotton tee with double-needle stitch work and a relaxed everyday cut.",
-    colorway: "Ash",
+      "Algodón cepillado suave, costura de doble aguja y un corte relajado para diario.",
+    colorway: "Ceniza",
     swatch: "#a8a8a4",
     sizes: ["XS", "S", "M", "L"],
-    materials: ["220gsm combed cotton"],
-    price: 80,
-    views: viewsFor("studio-tee-ash", "Relaxed Crew Tee (Ash)"),
+    materials: ["Algodón peinado de 220 g/m²"],
+    price: 1190,
+    views: viewsFor("studio-tee-ash", "Playera Cuello Redondo (Ceniza)"),
   },
   {
     slug: "fleece-jogger-onyx",
-    name: "Heavy Fleece Jogger",
-    collection: "Essentials",
+    name: "Jogger de Felpa Pesada",
+    collection: "Esenciales",
     category: "jogger",
     description:
-      "Structured loopback fleece jogger with an elasticated drawstring waist and tapered ankle cuffs.",
-    colorway: "Onyx",
+      "Jogger estructurado en felpa loopback, con cintura elástica de cordón y puños entallados al tobillo.",
+    colorway: "Ónix",
     swatch: "#222222",
     sizes: ["XS", "S", "M", "L", "XL"],
-    materials: ["420gsm loopback cotton fleece"],
-    price: 160,
+    materials: ["Felpa loopback de algodón de 420 g/m²"],
+    price: 2490,
     featured: true,
-    views: viewsFor("fleece-jogger-onyx", "Heavy Fleece Jogger (Onyx)"),
+    views: viewsFor("fleece-jogger-onyx", "Jogger de Felpa Pesada (Ónix)"),
   },
   {
     slug: "relaxed-jogger-heather",
-    name: "Relaxed Lounge Jogger",
-    collection: "Volume I",
+    name: "Jogger Relajado",
+    collection: "Volumen I",
     category: "jogger",
     description:
-      "Wide-cut athletic trouser with deep side-seam pockets and a clean gathered cuff.",
-    colorway: "Heather Grey",
+      "Pantalón deportivo de corte amplio, con bolsas profundas en la costura lateral y puño limpio.",
+    colorway: "Gris Jaspeado",
     swatch: "#c2c2be",
     sizes: ["S", "M", "L", "XL"],
-    materials: ["380gsm brushed cotton"],
-    price: 150,
-    views: viewsFor("relaxed-jogger-heather", "Relaxed Lounge Jogger (Heather)"),
+    materials: ["Algodón cepillado de 380 g/m²"],
+    price: 2290,
+    views: viewsFor("relaxed-jogger-heather", "Jogger Relajado (Gris Jaspeado)"),
   },
   {
     slug: "cargo-jogger-stone",
-    name: "Technical Utility Jogger",
-    collection: "Volume I",
+    name: "Jogger Utilitario Técnico",
+    collection: "Volumen I",
     category: "jogger",
     description:
-      "Articulated knee darts and flush side pockets in crisp cotton-nylon twill.",
-    colorway: "Stone",
+      "Pinzas articuladas en la rodilla y bolsas laterales a ras, en sarga de algodón y nylon.",
+    colorway: "Piedra",
     swatch: "#deded8",
     sizes: ["XS", "S", "M", "L"],
-    materials: ["Cotton-nylon twill", "Elasticated cuff"],
-    price: 185,
-    views: viewsFor("cargo-jogger-stone", "Technical Utility Jogger (Stone)"),
+    materials: ["Sarga de algodón y nylon", "Puño elástico"],
+    price: 2890,
+    views: viewsFor("cargo-jogger-stone", "Jogger Utilitario Técnico (Piedra)"),
   },
 ];
 
